@@ -1,0 +1,13 @@
+{
+  "name": "주차기록",
+  "short_name": "주차기록",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F6F6F3",
+  "theme_color": "#F6F6F3",
+  "icons": [
+    { "src": "icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

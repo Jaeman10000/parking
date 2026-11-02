@@ -120,12 +120,12 @@
   .tab.on{background:#fff;color:var(--ink);font-weight:800;box-shadow:0 1px 3px rgba(0,0,0,.1)}
   .tab .n{min-width:30px;height:30px;border-radius:15px;display:inline-flex;align-items:center;justify-content:center;padding:0 8px;font-size:17px;font-weight:800;background:#D6D2C8;color:var(--ink)}
   .tab[data-tab=open] .n{background:var(--s-parked);color:#fff}
-  .tab[data-tab=due] .n.has{background:var(--s-due);color:#fff}
+  .tab[data-tab=paid] .n.has{background:var(--s-paid);color:#fff}
   .tab[data-tab=unpaid] .n.has{background:var(--s-unpaid);color:#fff}
   .filterinfo{font-size:17px;font-weight:600;color:var(--ink2)}
 
   .rows{display:grid;gap:8px}
-  .row{display:grid;grid-template-columns:200px 1fr 1fr 120px 170px 250px;gap:12px;align-items:center;
+  .row{display:grid;grid-template-columns:160px .8fr 1fr 100px 150px 1.6fr 205px;gap:10px;align-items:center;
     background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;border-left-width:8px}
   .row.st-parked{border-left-color:var(--s-parked)} .row.st-due{border-left-color:var(--s-due)}
   .row.st-paid{border-left-color:var(--s-paid)} .row.st-unpaid{border-left-color:var(--s-unpaid);background:#FFF8F8}
@@ -136,6 +136,11 @@
   .r-t{font-size:18px;font-weight:500} .r-t span{display:block;font-size:14px;color:var(--ink3);font-weight:600}
   .r-fee{font-size:21px;font-weight:800;text-align:right} .r-fee.run{font-size:17px;color:var(--ink3);font-weight:600}
   .r-acts{display:flex;gap:8px;justify-content:flex-end}
+  .r-st .chip{white-space:normal;flex-wrap:wrap;row-gap:0}
+  .r-memo{min-height:20px}
+  .r-memo:not(:empty){background:#F1EEE6;border-radius:10px;padding:6px 10px}
+  .r-memo span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:keep-all;overflow-wrap:anywhere;font-size:16px;font-weight:500;color:var(--ink);line-height:1.35}
+  .dtag{display:block;font-size:13px;font-weight:700;color:#5B3FB5;margin-top:2px}
   .empty{padding:36px;text-align:center;color:var(--ink3);font-size:19px;font-weight:500;background:#fff;border:1px dashed var(--line);border-radius:16px}
 
   footer{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:18px;flex-wrap:wrap}
@@ -179,6 +184,17 @@
   .seg button.on.due{background:var(--s-due);border-color:var(--s-due);color:#fff}
   .seg button.on.paid{background:var(--s-paid);border-color:var(--s-paid);color:#fff}
   .seg button.on.unpaid{background:var(--s-unpaid);border-color:var(--s-unpaid);color:#fff}
+  .seg.seg2{grid-template-columns:1fr 1fr}
+  .seg button.on.dsc{background:#5B3FB5;border-color:#5B3FB5;color:#fff}
+  .disc{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  .disc button{height:66px;border-radius:14px;border:2px solid #5B3FB5;background:#fff;color:#5B3FB5;font-size:21px;font-weight:800;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+  .disc button small{font-size:13px;font-weight:600}
+  .disc button.on{background:#5B3FB5;color:#fff}
+  .tstep{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:18px;font-weight:700;color:#5B3FB5}
+  .tstep button{width:64px;height:52px;border-radius:12px;border:2px solid #5B3FB5;background:#fff;color:#5B3FB5;font-size:24px;font-weight:800}
+  .tstep b{min-width:120px;text-align:center;font-size:24px;font-weight:800}
+  .calc{font-size:18px;color:var(--ink2);font-weight:600;margin-top:4px}
+  .feebig s{font-size:24px;color:var(--ink3);font-weight:600;margin-left:12px}
   .preview{margin-top:16px;border-radius:16px;background:#2D2B27;color:#fff;padding:16px 18px;display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
   .preview .p-fee{font-size:40px;font-weight:800} .preview .p-fee span{font-size:22px}
   .preview .p-dur{font-size:19px;font-weight:500;color:#DAD6CE}
@@ -217,7 +233,8 @@
   @media (max-width:900px){
     .entry{grid-template-columns:1fr 1fr}
     .entry .field{grid-column:1/-1}
-    .row{grid-template-columns:1fr auto;grid-template-areas:"pl st" "ti fe" "to ac"}
+    .row{grid-template-columns:1fr auto;grid-template-areas:"pl st" "ti fe" "to ac" "me me"}
+    .row .r-memo{grid-area:me} .row .r-memo:empty{display:none}
     .row .r-plate{grid-area:pl} .row .r-st{grid-area:st;justify-self:end}
     .row .r-in{grid-area:ti} .row .r-fee{grid-area:fe} .row .r-out{grid-area:to} .row .r-acts{grid-area:ac}
     .visit{grid-template-columns:80px 1fr auto;grid-template-areas:"n d st" "n t fe" "a a a"}
@@ -238,6 +255,7 @@
   </header>
 
   <div class="night" id="night"></div>
+  <div class="night" id="dueBar"></div>
 
   <section class="entry">
     <div class="field">
@@ -254,7 +272,7 @@
   <div class="bar">
     <div class="tabs" id="tabs">
       <button class="tab" data-tab="open">주차 중<span class="n" id="nOpen">0</span></button>
-      <button class="tab" data-tab="due">결제 확인 전<span class="n" id="nDue">0</span></button>
+      <button class="tab" data-tab="paid">납부 완료<span class="n" id="nPaid">0</span></button>
       <button class="tab" data-tab="unpaid">미납<span class="n" id="nUnpaid">0</span></button>
       <button class="tab" data-tab="all">전체<span class="n" id="nAll">0</span></button>
     </div>
@@ -294,7 +312,8 @@
   "use strict";
   var KEY = "parking.records.v2", KEY_OLD = "parking.records.v1";
   var UNIT_MIN = 10, UNIT_PRICE = 400;
-  var ST = { parked: "주차 중", due: "결제 확인 전", paid: "받음", unpaid: "미납" };
+  var ST = { parked: "주차 중", due: "결제 확인 전", paid: "납부 완료", unpaid: "미납" };
+  var TKEY = "parking.ticketMin";
   var REASON = { run: "안 내고 감", gone: "몰래 나감" };
   var I_CHECK = '<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
   var I_X = '<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
@@ -343,7 +362,18 @@
   function minsBetween(a, b){ return Math.max(0, Math.floor(b / 60000) - Math.floor(a / 60000)); }
   function feeFor(mins){ return Math.ceil(mins / UNIT_MIN) * UNIT_PRICE; }
   function minutesOf(r){ return minsBetween(r.inAt, r.outAt || Date.now()); }
-  function feeOf(r){ return feeFor(minutesOf(r)); }
+  // 할인: 월정액 = 0원 / 주차권 = 주차권 시간만큼 빼고 남은 시간만 10분 단위로 받음
+  function calcFee(inAt, outAt, disc, discMin){
+    var m = minsBetween(inAt, outAt);
+    if (disc === "monthly") return 0;
+    if (disc === "ticket") m = Math.max(0, m - (discMin || 120));
+    return feeFor(m);
+  }
+  function feeOf(r){ return calcFee(r.inAt, r.outAt || Date.now(), r.disc, r.discMin); }
+  function grossOf(r){ return feeFor(minutesOf(r)); }
+  function hmLen(min){ var h = Math.floor(min / 60), m = min % 60; return (h ? h + "시간" : "") + (h && m ? " " : "") + (m ? m + "분" : ""); }
+  function discLabel(r){ return r.disc === "monthly" ? "월정액" : r.disc === "ticket" ? "주차권 " + hmLen(r.discMin || 120) : ""; }
+  function ticketMin(){ var v = 0; try { v = +localStorage.getItem(TKEY); } catch(e){} return v >= 30 ? v : 120; }
   function won(n){ return n.toLocaleString("ko-KR") + "원"; }
   function dur(min){ var h = Math.floor(min/60), m = min % 60; return h ? (h + "시간 " + m + "분") : (m + "분"); }
   function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
@@ -356,7 +386,7 @@
   function sumFee(list){ return list.reduce(function(s, r){ return s + feeOf(r); }, 0); }
   function chip(r){
     var s = stOf(r), t = ST[s];
-    if (s === "paid") t = I_CHECK + t;
+    if (s === "paid") t = I_CHECK + (r.disc && feeOf(r) === 0 ? "무료" : t);
     if (s === "unpaid") t = I_WARN + t + (r.reason ? ' <small>' + REASON[r.reason] + '</small>' : "");
     return '<span class="chip ' + s + '">' + t + '</span>';
   }
@@ -426,23 +456,36 @@
 
   /* 결제 확인 */
   function openPay(rec){
-    var past = unpaidOf(rec.plate, rec), pastSum = sumFee(past), fee = feeOf(rec);
+    var past = unpaidOf(rec.plate, rec), pastSum = sumFee(past), fee = feeOf(rec), gross = grossOf(rec), mins = minutesOf(rec);
+    var tm = rec.discMin || ticketMin(), prev = null;
+    visitsOf(rec.plate).forEach(function(r){ if (r !== rec && r.disc && r.inAt < rec.inAt) prev = r.disc; });
+    var calc = rec.disc === "ticket" ? "이용 " + dur(mins) + " - 주차권 " + hmLen(tm) + " = " + (mins > tm ? dur(mins - tm) + "만 계산" : "남는 시간 없음")
+             : rec.disc === "monthly" ? "월정액 차량이라 요금이 없어요" : "";
+    function dbtn(v, name, sub){
+      var on = rec.disc === v;
+      return '<button class="' + (on ? "on" : "") + '" data-act="disc" data-v="' + v + '">' + name + '<small>' + (on ? "적용됨 · 다시 누르면 취소" : prev === v ? "이 차, 지난번에 사용" : sub) + '</small></button>';
+    }
     var html = '<h2>' + esc(rec.plate) + ' 결제</h2>' +
-      '<div class="sub">' + dayLabel(rec.inAt) + ' ' + hm(rec.inAt) + ' → ' + (sod(rec.outAt) !== sod(rec.inAt) ? dayLabel(rec.outAt) + ' ' : '') + hm(rec.outAt) + ' · ' + dur(minutesOf(rec)) + '</div>' +
-      '<div class="feebig">' + won(fee).replace("원", "<span>원</span>") + '</div>' +
+      '<div class="sub">' + dayLabel(rec.inAt) + ' ' + hm(rec.inAt) + ' → ' + (sod(rec.outAt) !== sod(rec.inAt) ? dayLabel(rec.outAt) + ' ' : '') + hm(rec.outAt) + ' · ' + dur(mins) + '</div>' +
+      '<div class="feebig">' + won(fee).replace("원", "<span>원</span>") + (rec.disc && gross !== fee ? '<s>' + won(gross) + '</s>' : '') + '</div>' +
+      (calc ? '<div class="calc">' + calc + '</div>' : '') +
+      '<div class="disc">' + dbtn("ticket", "주차권 " + hmLen(tm), "제휴 음식점 손님") + dbtn("monthly", "월정액 무료", "정기 이용 차량") + '</div>' +
+      (rec.disc === "ticket" ? '<div class="tstep">주차권 시간<button data-act="tmin" data-d="-30">-</button><b>' + hmLen(tm) + '</b><button data-act="tmin" data-d="30">+</button></div>' : '') +
       (past.length ? '<div class="note red">' + I_WARN + ' 지난번 안 낸 돈 ' + past.length + '건 · ' + won(pastSum) + '도 있어요</div>' : '') +
       '<div class="mbtns">' +
-        '<button class="mbtn green" data-act="paid">' + I_CHECK + ' 돈 받았어요</button>' +
+        '<button class="mbtn green" data-act="paid">' + I_CHECK + (fee > 0 ? ' 돈 받았어요 <small>' + won(fee) + '</small>' : ' 0원 · 끝내기') + '</button>' +
         (past.length ? '<button class="mbtn green" data-act="paidAll">' + I_CHECK + ' 지난 미납까지 다 받았어요 <small>합계 ' + won(fee + pastSum) + '</small></button>' : '') +
-        '<button class="mbtn red" data-act="unpaid">' + I_X + ' 안 내고 갔어요</button>' +
-        '<div class="mrow3">' +
+        (fee > 0 ? '<button class="mbtn red" data-act="unpaid">' + I_X + ' 안 내고 갔어요</button>' : '') +
+        '<div class="mrow">' +
           '<button class="mbtn ghost" data-act="edit">시간 고치기</button>' +
           '<button class="mbtn ghost" data-act="undo">계산 취소</button>' +
-          '<button class="mbtn ghost" data-act="later">나중에</button>' +
         '</div></div>' +
       '<div class="note gray">계산을 잘못 눌렀으면 [계산 취소] → 다시 주차 중으로 돌아가요.</div>';
+    function again(){ var st = $("sheet").scrollTop; save(); renderAll(); openPay(rec); $("sheet").scrollTop = st; }
     openModal(html, {
-      paid: function(){ rec.status = "paid"; rec.paidAt = Date.now(); save(); closeModal(); renderAll(); toast("ok", rec.plate + " " + won(fee) + " 받음 · 끝났어요"); },
+      disc: function(b){ var v = b.dataset.v; if (rec.disc === v) { delete rec.disc; delete rec.discMin; } else { rec.disc = v; if (v === "ticket") rec.discMin = tm; else delete rec.discMin; } again(); },
+      tmin: function(b){ rec.discMin = Math.min(720, Math.max(30, tm + (+b.dataset.d))); try { localStorage.setItem(TKEY, rec.discMin); } catch(e){} again(); },
+      paid: function(){ rec.status = "paid"; rec.paidAt = Date.now(); save(); closeModal(); renderAll(); toast("ok", rec.plate + " " + (fee > 0 ? won(fee) + " 받음" : rec.disc ? "무료(" + discLabel(rec) + ")" : "0원") + " · 끝났어요"); },
       paidAll: function(){
         var now = Date.now();
         rec.status = "paid"; rec.paidAt = now;
@@ -451,8 +494,7 @@
       },
       unpaid: function(){ rec.status = "unpaid"; rec.reason = "run"; save(); closeModal(); renderAll(); toast("warn", rec.plate + " 미납 " + won(fee) + " 기록했어요. 다음에 오면 알려 드려요."); },
       edit: function(){ openEdit(rec); },
-      undo: function(){ rec.outAt = null; rec.status = "parked"; save(); closeModal(); renderAll(); toast("info", rec.plate + " 계산 취소 · 다시 주차 중이에요"); },
-      later: function(){ closeModal(); renderAll(); toast("info", "[결제 확인 전] 목록에 남겨 뒀어요."); }
+      undo: function(){ rec.outAt = null; rec.status = "parked"; delete rec.disc; delete rec.discMin; save(); closeModal(); renderAll(); toast("info", rec.plate + " 계산 취소 · 다시 주차 중이에요"); }
     });
   }
 
@@ -482,7 +524,7 @@
   function fromInput(v){ var m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(v || ""); return m ? new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5], 0).getTime() : null; }
 
   function openEdit(rec){
-    var d = { plate: rec.plate, inAt: rec.inAt, outAt: rec.outAt, status: stOf(rec), memo: rec.memo || "", reason: rec.reason };
+    var d = { plate: rec.plate, inAt: rec.inAt, outAt: rec.outAt, status: stOf(rec), memo: rec.memo || "", reason: rec.reason, disc: rec.disc || "", discMin: rec.discMin || ticketMin() };
     function adjRow(f){ return '<div class="adj"><button data-act="adj" data-f="' + f + '" data-m="-10">-10분</button><button data-act="adj" data-f="' + f + '" data-m="-1">-1분</button><button data-act="adj" data-f="' + f + '" data-m="1">+1분</button><button data-act="adj" data-f="' + f + '" data-m="10">+10분</button></div>'; }
     function draw(){
       var html = '<h2>기록 고치기</h2><div class="sub">' + esc(rec.plate) + ' · ' + nthOf(rec) + '번째 방문</div>' +
@@ -492,10 +534,14 @@
           ? '<input type="datetime-local" id="eOut" step="60" value="' + toInput(d.outAt) + '">' + adjRow("out") +
             '<button class="outcancel" data-act="clearOut">나간 기록 지우기 (아직 주차 중으로)</button>'
           : '<div class="parkedbox">아직 주차 중<button data-act="outNow">지금 나간 걸로</button></div>') + '</div>' +
+        '<div class="ef"><label>할인</label><div class="seg">' +
+          '<button class="dsc' + (!d.disc ? " on" : "") + '" data-act="dsc" data-v="">할인 없음</button>' +
+          '<button class="dsc' + (d.disc === "ticket" ? " on" : "") + '" data-act="dsc" data-v="ticket">주차권</button>' +
+          '<button class="dsc' + (d.disc === "monthly" ? " on" : "") + '" data-act="dsc" data-v="monthly">월정액 무료</button></div>' +
+          (d.disc === "ticket" ? '<div class="tstep">주차권 시간<button data-act="etm" data-d="-30">-</button><b>' + hmLen(d.discMin) + '</b><button data-act="etm" data-d="30">+</button></div>' : '') + '</div>' +
         '<div class="preview" id="ePrev"></div>' +
-        (d.outAt ? '<div class="ef"><label>돈 받았나요?</label><div class="seg">' +
-          '<button class="due' + (d.status === "due" ? " on" : "") + '" data-act="st" data-v="due">아직 확인 전</button>' +
-          '<button class="paid' + (d.status === "paid" ? " on" : "") + '" data-act="st" data-v="paid">받았어요</button>' +
+        (d.outAt ? '<div class="ef"><label>돈 받았나요?</label><div class="seg seg2">' +
+          '<button class="paid' + (d.status === "paid" ? " on" : "") + '" data-act="st" data-v="paid">납부 완료</button>' +
           '<button class="unpaid' + (d.status === "unpaid" ? " on" : "") + '" data-act="st" data-v="unpaid">미납</button></div></div>' : '') +
         '<div class="ef"><label>메모</label><textarea id="eMemo" placeholder="예: 내일 준다고 함">' + esc(d.memo) + '</textarea></div>' +
         '<div class="mbtns mrow"><button class="mbtn ghost" data-act="close">닫기</button><button class="mbtn dark" data-act="save" id="eSave">저장</button></div>' +
@@ -516,13 +562,15 @@
       if ($("rdOut")) $("rdOut").textContent = d.outAt ? '→ ' + dayLabel(d.outAt) + ' ' + ampm(d.outAt) : '';
       if (d.outAt) {
         if (d.outAt < d.inAt) { p.className = "preview bad"; p.innerHTML = '<span class="p-fee" style="font-size:24px">' + I_WARN + ' 나간 시간이 들어온 시간보다 빨라요</span>'; ok = false; }
-        else { var m = minsBetween(d.inAt, d.outAt); p.className = "preview"; p.innerHTML = '<span class="p-fee">' + won(feeFor(m)).replace("원", "<span>원</span>") + '</span><span class="p-dur">이용 ' + dur(m) + ' · 바꾸면 요금이 바로 다시 계산돼요</span>'; }
-      } else { var m2 = minsBetween(d.inAt, Date.now()); p.className = "preview"; p.innerHTML = '<span class="p-dur">지금까지 ' + dur(m2) + '</span><span class="p-fee" style="font-size:30px">현재 ' + won(feeFor(m2)) + '</span>'; }
+        else { var m = minsBetween(d.inAt, d.outAt); p.className = "preview"; p.innerHTML = '<span class="p-fee">' + won(calcFee(d.inAt, d.outAt, d.disc, d.discMin)).replace("원", "<span>원</span>") + '</span><span class="p-dur">이용 ' + dur(m) + (d.disc ? ' · ' + (d.disc === "monthly" ? "월정액 무료" : "주차권 " + hmLen(d.discMin) + " 뺌") : '') + ' · 바꾸면 요금이 바로 다시 계산돼요</span>'; }
+      } else { var m2 = minsBetween(d.inAt, Date.now()); p.className = "preview"; p.innerHTML = '<span class="p-dur">지금까지 ' + dur(m2) + '</span><span class="p-fee" style="font-size:30px">현재 ' + won(calcFee(d.inAt, Date.now(), d.disc, d.discMin)) + '</span>'; }
       $("eSave").disabled = !ok; $("eSave").style.opacity = ok ? 1 : .4;
     }
     openModal("", {
       adj: function(b){ var k = b.dataset.f === "in" ? "inAt" : "outAt"; d[k] += (+b.dataset.m) * 60000; var el = $(b.dataset.f === "in" ? "eIn" : "eOut"); el.value = toInput(d[k]); prev(); },
-      st: function(b){ d.status = b.dataset.v; if (d.status === "unpaid" && !d.reason) d.reason = "run"; document.querySelectorAll(".seg button").forEach(function(x){ x.classList.toggle("on", x.dataset.v === d.status); }); },
+      st: function(b){ d.status = b.dataset.v; if (d.status === "unpaid" && !d.reason) d.reason = "run"; document.querySelectorAll(".seg2 button").forEach(function(x){ x.classList.toggle("on", x.dataset.v === d.status); }); },
+      dsc: function(b){ d.disc = b.dataset.v; draw(); },
+      etm: function(b){ d.discMin = Math.min(720, Math.max(30, d.discMin + (+b.dataset.d))); draw(); },
       outNow: function(){ d.outAt = Date.now(); d.status = "due"; draw(); },
       clearOut: function(){ d.outAt = null; d.status = "parked"; draw(); },
       close: closeModal,
@@ -532,10 +580,12 @@
         if (d.outAt && d.outAt < d.inAt) return;
         if (!d.outAt && findOpen(plate, rec)) { alertIn(plate + " 차는 다른 주차 중 기록이 이미 있어요."); return; }
         rec.plate = plate; rec.inAt = d.inAt; rec.outAt = d.outAt || null; rec.memo = d.memo.trim();
+        if (d.disc) { rec.disc = d.disc; if (d.disc === "ticket") rec.discMin = d.discMin; else delete rec.discMin; } else { delete rec.disc; delete rec.discMin; }
         rec.status = rec.outAt ? (d.status === "parked" ? "due" : d.status) : "parked";
         if (rec.status === "paid" && !rec.paidAt) rec.paidAt = Date.now();
         if (rec.status === "unpaid") rec.reason = d.reason || "run";
         save(); closeModal(); focusPlate = plate; renderAll(); toast("ok", plate + " 기록을 고쳤어요" + (rec.outAt ? " · 요금 " + won(feeOf(rec)) : ""));
+        if (stOf(rec) === "due") openPay(rec);
       },
       del: function(){ askConfirm("이 기록을 지울까요?", esc(rec.plate) + " · " + dayLabel(rec.inAt) + " " + hm(rec.inAt) + "<br>지우면 되돌릴 수 없어요.", "지우기", function(){
         records = records.filter(function(r){ return r !== rec; }); save(); renderAll(); toast("info", "기록을 지웠어요.");
@@ -569,6 +619,17 @@
     });
   }
 
+  /* 계산만 하고 결제 확인 안 된 차 */
+  function openDue(){
+    var list = records.filter(function(r){ return stOf(r) === "due"; }).sort(function(a, b){ return a.outAt - b.outAt; });
+    if (!list.length) { closeModal(); renderAll(); return; }
+    if (list.length === 1) { openPay(list[0]); return; }
+    openModal('<h2>돈 받았는지 확인할 차</h2><div class="sub">하나씩 눌러서 정리해 주세요.</div><div class="nlist">' +
+      list.map(function(r){ return '<div class="nitem"><div class="np">' + esc(r.plate) + '</div><div class="nd">' + dayLabel(r.outAt) + ' ' + hm(r.outAt) + ' 계산 · <b>' + won(feeOf(r)) + '</b></div><button class="mbtn dark" style="width:100%" data-act="pick" data-id="' + r.id + '">결제 확인</button></div>'; }).join("") +
+      '</div><div class="mbtns"><button class="mbtn ghost" data-act="close">닫기</button></div>',
+      { pick: function(b){ openPay(byId(b.dataset.id)); }, close: closeModal });
+  }
+
   /* ---------- 화면 그리기 ---------- */
   function visitRow(r, compact){
     var s = stOf(r), n = nthOf(r);
@@ -584,7 +645,7 @@
       '<div class="v-n"><b>' + n + '</b>번째</div>' +
       '<div class="v-date">' + dayLabel(r.inAt) + '</div>' +
       '<div class="v-time">' + hm(r.inAt) + ' → ' + outTxt + '<span>' + (r.outAt || minutesOf(r) ? dur(minutesOf(r)) : '방금 들어옴') + (r.memo ? ' · ' + esc(r.memo) : '') + '</span></div>' +
-      '<div class="v-fee' + (r.outAt ? '' : ' run') + '">' + (r.outAt ? won(feeOf(r)) : '현재 ' + won(feeOf(r))) + '</div>' +
+      '<div class="v-fee' + (r.outAt ? '' : ' run') + '">' + (r.outAt ? won(feeOf(r)) : '현재 ' + won(feeOf(r))) + (r.disc ? '<span class="dtag">' + discLabel(r) + '</span>' : '') + '</div>' +
       '<div class="v-st">' + chip(r) + '</div>' +
       (compact ? '' : '<div class="v-acts">' + acts + '</div>') + '</div>';
   }
@@ -616,10 +677,10 @@
 
   function renderList(){
     var q = norm(plateEl.value);
-    var cnt = { open: 0, due: 0, unpaid: 0 };
-    records.forEach(function(r){ var s = stOf(r); if (s === "parked") cnt.open++; else if (s === "due") cnt.due++; else if (s === "unpaid") cnt.unpaid++; });
-    $("nOpen").textContent = cnt.open; $("nDue").textContent = cnt.due; $("nUnpaid").textContent = cnt.unpaid; $("nAll").textContent = records.length;
-    $("nDue").classList.toggle("has", cnt.due > 0); $("nUnpaid").classList.toggle("has", cnt.unpaid > 0);
+    var cnt = { open: 0, paid: 0, unpaid: 0 };
+    records.forEach(function(r){ var s = stOf(r); if (s === "parked") cnt.open++; else if (s === "paid") cnt.paid++; else if (s === "unpaid") cnt.unpaid++; });
+    $("nOpen").textContent = cnt.open; $("nPaid").textContent = cnt.paid; $("nUnpaid").textContent = cnt.unpaid; $("nAll").textContent = records.length;
+    $("nPaid").classList.toggle("has", cnt.paid > 0); $("nUnpaid").classList.toggle("has", cnt.unpaid > 0);
     document.querySelectorAll(".tab").forEach(function(b){ b.classList.toggle("on", b.dataset.tab === tab); });
 
     var list = records.filter(function(r){ var s = stOf(r); return tab === "all" || (tab === "open" && s === "parked") || s === tab; });
@@ -638,10 +699,11 @@
         '<div class="r-plate' + (n >= 2 ? " re" : "") + '" data-act="focus" data-plate="' + esc(r.plate) + '"><b>' + esc(r.plate) + '</b><span>' + n + '번째 방문</span></div>' +
         '<div class="r-t r-in"><span>들어옴</span>' + dayLabel(r.inAt) + ' ' + hm(r.inAt) + '</div>' +
         '<div class="r-t r-out"><span>나감</span>' + (r.outAt ? dayLabel(r.outAt) + ' ' + hm(r.outAt) : (minutesOf(r) ? '주차 중 · ' + dur(minutesOf(r)) : '방금 들어옴')) + '</div>' +
-        '<div class="r-fee' + (r.outAt ? '' : ' run') + '">' + (r.outAt ? won(feeOf(r)) : '현재<br>' + won(feeOf(r))) + '</div>' +
+        '<div class="r-fee' + (r.outAt ? '' : ' run') + '">' + (r.outAt ? won(feeOf(r)) : '현재<br>' + won(feeOf(r))) + (r.disc ? '<span class="dtag">' + discLabel(r) + '</span>' : '') + '</div>' +
         '<div class="r-st">' + chip(r) + '</div>' +
+        '<div class="r-memo" data-act="edit" data-id="' + r.id + '">' + (r.memo ? '<span>' + esc(r.memo) + '</span>' : '') + '</div>' +
         '<div class="r-acts">' + acts + '</div></div>';
-    }).join("") : '<div class="empty">' + (q ? "맞는 기록이 없어요." : ({ open: "주차 중인 차가 없어요.", due: "결제 확인할 차가 없어요.", unpaid: "미납이 없어요.", all: "기록이 없어요." })[tab]) + '</div>';
+    }).join("") : '<div class="empty">' + (q ? "맞는 기록이 없어요." : ({ open: "주차 중인 차가 없어요.", paid: "납부 완료된 기록이 없어요.", unpaid: "미납이 없어요.", all: "기록이 없어요." })[tab]) + '</div>';
   }
 
   function renderTop(){
@@ -651,6 +713,9 @@
     var nc = nightCars(), el = $("night");
     if (nc.length) { el.className = "night show"; el.innerHTML = I_WARN + '<span>어제부터 남아 있는 차 <b>' + nc.length + '대</b> — 아직 있는지 확인해 주세요</span><button data-act="night">확인하기</button>'; }
     else { el.className = "night"; el.innerHTML = ""; }
+    var dc = records.filter(function(r){ return stOf(r) === "due"; }), db = $("dueBar");
+    if (dc.length) { db.className = "night show"; db.innerHTML = I_WARN + '<span>계산은 했는데 돈 받았는지 확인 안 된 차 <b>' + dc.length + '대</b></span><button data-act="due">확인하기</button>'; }
+    else { db.className = "night"; db.innerHTML = ""; }
     var today = sod(Date.now()), sum = 0, owed = 0;
     records.forEach(function(r){ var s = stOf(r); if (s === "paid" && r.paidAt && sod(r.paidAt) === today) sum += feeOf(r); if (s === "unpaid") owed += feeOf(r); });
     $("todaySum").textContent = won(sum); $("owedSum").textContent = won(owed);
@@ -703,6 +768,7 @@
     else if (a === "carclose") { focusPlate = null; renderCar(); }
     else if (a === "history") openSearch(b.dataset.plate);
     else if (a === "night") openNight();
+    else if (a === "due") openDue();
     else if (a === "spick") { sSel = b.dataset.plate; renderSearch(); window.scrollTo(0, 0); $("search").scrollTop = 0; }
     else if (a === "sback") { sSel = null; if (norm($("sq").value) && Object.keys(visitsOf(norm($("sq").value))).length) $("sq").value = ""; renderSearch(); }
   }
@@ -721,11 +787,11 @@
   /* ---------- 내보내기 / 불러오기 ---------- */
   function exportCsv(){
     if (!records.length) { toast("warn", "내보낼 기록이 없어요."); return; }
-    var rows = [["번호","차량번호","방문차수","들어온시간","나간시간","이용(분)","요금(원)","상태","메모"]];
+    var rows = [["번호","차량번호","방문차수","들어온시간","나간시간","이용(분)","원래요금(원)","할인","받을요금(원)","상태","메모"]];
     records.slice().sort(function(a,b){ return a.inAt - b.inAt; }).forEach(function(r, i){
       var s = stOf(r);
       rows.push([i+1, r.plate, nthOf(r), ymd(r.inAt) + " " + hms(r.inAt), r.outAt ? ymd(r.outAt) + " " + hms(r.outAt) : "",
-        r.outAt ? minutesOf(r) : "", r.outAt ? feeOf(r) : "", ST[s] + (s === "unpaid" && r.reason ? "(" + REASON[r.reason] + ")" : ""), r.memo || ""]);
+        r.outAt ? minutesOf(r) : "", r.outAt ? grossOf(r) : "", discLabel(r), r.outAt ? feeOf(r) : "", (s === "paid" && r.disc && feeOf(r) === 0 ? "무료" : ST[s]) + (s === "unpaid" && r.reason ? "(" + REASON[r.reason] + ")" : ""), r.memo || ""]);
     });
     var csv = "﻿" + rows.map(function(row){ return row.map(function(v){ v = String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(","); }).join("\r\n");
     var name = "주차기록_" + ymd(Date.now()) + ".csv", blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
@@ -751,16 +817,19 @@
     var fr = new FileReader();
     fr.onload = function(){
       var all = parseCsv(String(fr.result).replace(/^﻿/, "")), head = all[0] || [], rows = all.slice(1);
-      var v2 = head.indexOf("상태") !== -1;
+      var v2 = head.indexOf("상태") !== -1, v3 = head.indexOf("할인") !== -1;
       var keys = {}, got = [];
       records.forEach(function(r){ keys[r.plate + "|" + r.inAt] = 1; });
       rows.forEach(function(c){
         var plate = norm(c[1]), inAt = toMs(v2 ? c[3] : c[2]), outAt = toMs(v2 ? c[4] : c[3]);
         if (!plate || !inAt || keys[plate + "|" + inAt]) return;
         keys[plate + "|" + inAt] = 1;
-        var st = "due", reason, stTxt = v2 ? String(c[7] || "") : "";
-        if (!outAt) st = "parked"; else if (stTxt.indexOf("받음") === 0) st = "paid"; else if (stTxt.indexOf("미납") === 0) { st = "unpaid"; reason = stTxt.indexOf("몰래") !== -1 ? "gone" : "run"; }
-        got.push({ id: uid(), plate: plate, inAt: inAt, outAt: outAt, status: st, reason: reason, memo: v2 ? (c[8] || "") : "" });
+        var st = "due", reason, stTxt = v3 ? String(c[9] || "") : v2 ? String(c[7] || "") : "";
+        if (!outAt) st = "parked"; else if (/^(받음|납부|무료)/.test(stTxt)) st = "paid"; else if (stTxt.indexOf("미납") === 0) { st = "unpaid"; reason = stTxt.indexOf("몰래") !== -1 ? "gone" : "run"; }
+        var nr = { id: uid(), plate: plate, inAt: inAt, outAt: outAt, status: st, reason: reason, memo: v3 ? (c[10] || "") : v2 ? (c[8] || "") : "" }, dt = v3 ? String(c[7] || "") : "";
+        if (dt.indexOf("월정액") === 0) nr.disc = "monthly";
+        else if (dt.indexOf("주차권") === 0) { var hh = /(\d+)시간/.exec(dt), mm = /(\d+)분/.exec(dt); nr.disc = "ticket"; nr.discMin = ((hh ? +hh[1] * 60 : 0) + (mm ? +mm[1] : 0)) || 120; }
+        got.push(nr);
       });
       if (!got.length) { toast("info", "새로 불러올 기록이 없어요."); return; }
       askConfirm("백업 불러오기", got.length + "건을 추가할까요?", "추가", function(){ records = records.concat(got); save(); renderAll(); toast("ok", got.length + "건 불러왔어요."); });

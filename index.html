@@ -195,6 +195,29 @@
   .tstep b{min-width:120px;text-align:center;font-size:24px;font-weight:800}
   .calc{font-size:18px;color:var(--ink2);font-weight:600;margin-top:4px}
   .feebig s{font-size:24px;color:var(--ink3);font-weight:600;margin-left:12px}
+  .seg.seg4{grid-template-columns:repeat(4,1fr)}
+  #plate.mem{border-color:#5B3FB5;background:#F5F1FF}
+  .membtn{border-color:#5B3FB5;color:#5B3FB5}
+  .mtag{display:block;margin-top:3px;font-style:normal;font-size:14px;font-weight:800;color:#5B3FB5}
+  .mtag.off{color:var(--s-unpaid)}
+  .mbox{margin-top:12px;border-radius:14px;background:#EFEAFB;color:#3F2A8C;padding:12px 16px;font-size:19px;font-weight:600;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .mbox b{font-size:23px;font-weight:800}
+  .mbox.soon{background:var(--s-due-bg);color:var(--s-due)}
+  .mbox.off{background:var(--s-unpaid-bg);color:var(--s-unpaid)}
+  .car-reg{margin-left:auto;height:48px;padding:0 16px;border-radius:12px;border:2px solid #5B3FB5;background:#fff;color:#5B3FB5;font-size:17px;font-weight:700}
+  .addbtn{width:100%;height:68px;border-radius:16px;border:0;background:#5B3FB5;color:#fff;font-size:23px;font-weight:800;margin-bottom:14px}
+  .memlist{display:grid;gap:8px}
+  .mem{display:grid;grid-template-columns:200px 110px 1fr 240px auto;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-left:8px solid #5B3FB5;border-radius:16px;padding:14px 18px}
+  .mem.off{border-left-color:var(--s-unpaid);background:#FFF8F8}
+  .mem .mp{font-size:28px;font-weight:800}
+  .mem .mn{font-size:20px;font-weight:700}
+  .mu{font-size:17px;font-weight:600;color:var(--ink2)}
+  .mu.soon{color:var(--s-due)} .mu.off{color:var(--s-unpaid)}
+  .kchip{display:inline-flex;border-radius:999px;padding:6px 14px;font-size:17px;font-weight:800;background:#EFEAFB;color:#5B3FB5}
+  .kchip.staff{background:#E2F3F1;color:#0E6E63}
+  .quick{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+  .quick button{height:50px;padding:0 18px;border-radius:12px;border:1px solid #CFCAC0;background:#F6F5F1;font-size:18px;font-weight:700;color:var(--ink)}
+  .ef input[type=date]{width:100%;height:64px;font-size:24px;font-weight:700;padding:0 14px;border:2px solid #BDB8AE;border-radius:14px;font-family:inherit;background:#fff;color:var(--ink);-webkit-appearance:none;appearance:none}
   .preview{margin-top:16px;border-radius:16px;background:#2D2B27;color:#fff;padding:16px 18px;display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
   .preview .p-fee{font-size:40px;font-weight:800} .preview .p-fee span{font-size:22px}
   .preview .p-dur{font-size:19px;font-weight:500;color:#DAD6CE}
@@ -235,6 +258,8 @@
     .entry .field{grid-column:1/-1}
     .row{grid-template-columns:1fr auto;grid-template-areas:"pl st" "ti fe" "to ac" "me me"}
     .row .r-memo{grid-area:me} .row .r-memo:empty{display:none}
+    .mem{grid-template-columns:1fr auto;grid-template-areas:"p k" "n n" "u a"}
+    .mem .mp{grid-area:p} .mem .mk{grid-area:k;justify-self:end} .mem .mn{grid-area:n} .mem > .mu{grid-area:u} .mem .ma{grid-area:a}
     .row .r-plate{grid-area:pl} .row .r-st{grid-area:st;justify-self:end}
     .row .r-in{grid-area:ti} .row .r-fee{grid-area:fe} .row .r-out{grid-area:to} .row .r-acts{grid-area:ac}
     .visit{grid-template-columns:80px 1fr auto;grid-template-areas:"n d st" "n t fe" "a a a"}
@@ -251,6 +276,7 @@
     <h1>주차기록</h1>
     <span class="rate">10분당 400원</span>
     <span class="clock" id="clock">--:--</span>
+    <button class="searchbtn membtn" id="btnMembers">등록 차량</button>
     <button class="searchbtn" id="btnSearch"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>차량 조회</button>
   </header>
 
@@ -305,6 +331,17 @@
   </div>
 </div>
 
+<div class="search" id="members">
+  <div class="s-head">
+    <h2>등록 차량 <span style="font-size:18px;color:var(--ink3);font-weight:600">월정액 · 직원</span></h2>
+    <button class="s-close" id="mClose">닫기</button>
+  </div>
+  <div class="s-body">
+    <button class="addbtn" data-act="madd">+ 차량 등록하기</button>
+    <div id="mList"></div>
+  </div>
+</div>
+
 <div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
 
 <script>
@@ -313,7 +350,9 @@
   var KEY = "parking.records.v2", KEY_OLD = "parking.records.v1";
   var UNIT_MIN = 10, UNIT_PRICE = 400;
   var ST = { parked: "주차 중", due: "결제 확인 전", paid: "납부 완료", unpaid: "미납" };
-  var TKEY = "parking.ticketMin";
+  var TKEY = "parking.ticketMin", MKEY = "parking.members.v1";
+  var KIND = { monthly: "월정액", staff: "직원" };
+  var members = loadMembers();
   var REASON = { run: "안 내고 감", gone: "몰래 나감" };
   var I_CHECK = '<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
   var I_X = '<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
@@ -365,15 +404,29 @@
   // 할인: 월정액 = 0원 / 주차권 = 주차권 시간만큼 빼고 남은 시간만 10분 단위로 받음
   function calcFee(inAt, outAt, disc, discMin){
     var m = minsBetween(inAt, outAt);
-    if (disc === "monthly") return 0;
+    if (disc === "monthly" || disc === "staff") return 0;
     if (disc === "ticket") m = Math.max(0, m - (discMin || 120));
     return feeFor(m);
   }
   function feeOf(r){ return calcFee(r.inAt, r.outAt || Date.now(), r.disc, r.discMin); }
   function grossOf(r){ return feeFor(minutesOf(r)); }
   function hmLen(min){ var h = Math.floor(min / 60), m = min % 60; return (h ? h + "시간" : "") + (h && m ? " " : "") + (m ? m + "분" : ""); }
-  function discLabel(r){ return r.disc === "monthly" ? "월정액" : r.disc === "ticket" ? "주차권 " + hmLen(r.discMin || 120) : ""; }
+  function discLabel(r){ return r.disc === "monthly" || r.disc === "staff" ? KIND[r.disc] : r.disc === "ticket" ? "주차권 " + hmLen(r.discMin || 120) : ""; }
   function ticketMin(){ var v = 0; try { v = +localStorage.getItem(TKEY); } catch(e){} return v >= 30 ? v : 120; }
+  function loadMembers(){ try { var a = JSON.parse(localStorage.getItem(MKEY) || "[]"); return Array.isArray(a) ? a : []; } catch(e){ return []; } }
+  function saveMembers(){ try { localStorage.setItem(MKEY, JSON.stringify(members)); } catch(e){ toast("warn", "등록 차량 저장에 실패했어요."); } }
+  function memberOf(plate){ for (var i = 0; i < members.length; i++) if (members[i].plate === plate) return members[i]; return null; }
+  function untilEnd(m){ if (!m.until) return Infinity; var p = m.until.split("-"); return new Date(+p[0], +p[1] - 1, +p[2], 23, 59, 59).getTime(); }
+  function memberActive(m){ return !!m && Date.now() <= untilEnd(m); }
+  function daysLeft(m){ return m.until ? Math.round((sod(untilEnd(m)) - sod(Date.now())) / 86400000) : null; }
+  function mClass(m){ if (!memberActive(m)) return " off"; var d = daysLeft(m); return d !== null && d <= 7 ? " soon" : ""; }
+  function memberText(m){ return KIND[m.kind] + (m.name ? " · " + m.name : ""); }
+  function untilText(m){
+    if (!m.until) return "기간 없음";
+    var p = m.until.split("-"), d = daysLeft(m), s = (+p[0] !== new Date().getFullYear() ? p[0] + "년 " : "") + (+p[1]) + "월 " + (+p[2]) + "일까지";
+    return s + (d < 0 ? " (끝남)" : d === 0 ? " (오늘까지)" : " (" + d + "일 남음)");
+  }
+  function mtag(p){ var m = memberOf(p); return m ? '<em class="mtag' + (memberActive(m) ? '' : ' off') + '">' + esc(memberText(m)) + (memberActive(m) ? '' : ' (기간 끝남)') + '</em>' : ''; }
   function won(n){ return n.toLocaleString("ko-KR") + "원"; }
   function dur(min){ var h = Math.floor(min/60), m = min % 60; return h ? (h + "시간 " + m + "분") : (m + "분"); }
   function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
@@ -434,7 +487,7 @@
     var n = nthOf(rec);
     focusPlate = plate; plateEl.value = ""; plateEl.blur(); tab = "open";
     renderAll();
-    toast("ok", plate + " 들어옴 " + hm(rec.inAt) + " · " + n + "번째 방문", [{ label: "실수예요, 취소", fn: function(){
+    toast("ok", plate + " 들어옴 " + hm(rec.inAt) + (memberOf(plate) ? " · " + memberText(memberOf(plate)) : "") + " · " + n + "번째 방문", [{ label: "실수예요, 취소", fn: function(){
       if (byId(rec.id) && !rec.outAt) { records = records.filter(function(r){ return r !== rec; }); save(); renderAll(); toast("info", "방금 주차 기록을 취소했어요."); }
     }}]);
     if (unpaidOf(plate).length) openOwe(plate);
@@ -448,6 +501,8 @@
       if (!rec) { focusPlate = plate; renderAll(); toast("warn", plate + " 차는 지금 주차 중인 기록이 없어요."); return; }
     }
     rec.outAt = Date.now(); rec.status = "due";
+    var mb = memberOf(rec.plate);
+    if (memberActive(mb) && !rec.disc) { rec.disc = mb.kind; delete rec.discMin; }
     if (!save()) { rec.outAt = null; rec.status = "parked"; return; }
     focusPlate = rec.plate; plateEl.value = ""; plateEl.blur();
     renderAll();
@@ -457,10 +512,10 @@
   /* 결제 확인 */
   function openPay(rec){
     var past = unpaidOf(rec.plate, rec), pastSum = sumFee(past), fee = feeOf(rec), gross = grossOf(rec), mins = minutesOf(rec);
-    var tm = rec.discMin || ticketMin(), prev = null;
+    var tm = rec.discMin || ticketMin(), prev = null, mb = memberOf(rec.plate), fk = rec.disc === "staff" || (mb && mb.kind === "staff") ? "staff" : "monthly";
     visitsOf(rec.plate).forEach(function(r){ if (r !== rec && r.disc && r.inAt < rec.inAt) prev = r.disc; });
     var calc = rec.disc === "ticket" ? "이용 " + dur(mins) + " - 주차권 " + hmLen(tm) + " = " + (mins > tm ? dur(mins - tm) + "만 계산" : "남는 시간 없음")
-             : rec.disc === "monthly" ? "월정액 차량이라 요금이 없어요" : "";
+             : rec.disc === "monthly" || rec.disc === "staff" ? KIND[rec.disc] + " 차량이라 요금이 없어요" : "";
     function dbtn(v, name, sub){
       var on = rec.disc === v;
       return '<button class="' + (on ? "on" : "") + '" data-act="disc" data-v="' + v + '">' + name + '<small>' + (on ? "적용됨 · 다시 누르면 취소" : prev === v ? "이 차, 지난번에 사용" : sub) + '</small></button>';
@@ -469,7 +524,8 @@
       '<div class="sub">' + dayLabel(rec.inAt) + ' ' + hm(rec.inAt) + ' → ' + (sod(rec.outAt) !== sod(rec.inAt) ? dayLabel(rec.outAt) + ' ' : '') + hm(rec.outAt) + ' · ' + dur(mins) + '</div>' +
       '<div class="feebig">' + won(fee).replace("원", "<span>원</span>") + (rec.disc && gross !== fee ? '<s>' + won(gross) + '</s>' : '') + '</div>' +
       (calc ? '<div class="calc">' + calc + '</div>' : '') +
-      '<div class="disc">' + dbtn("ticket", "주차권 " + hmLen(tm), "제휴 음식점 손님") + dbtn("monthly", "월정액 무료", "정기 이용 차량") + '</div>' +
+      (mb ? '<div class="mbox' + mClass(mb) + '">등록 차량 <b>' + esc(memberText(mb)) + '</b>' + untilText(mb) + (memberActive(mb) ? '' : ' · 기간이 끝나서 요금을 받아야 해요') + '</div>' : '') +
+      '<div class="disc">' + dbtn("ticket", "주차권 " + hmLen(tm), "제휴 음식점 손님") + dbtn(fk, KIND[fk] + " 무료", fk === "staff" ? "직원 차량" : "정기 이용 차량") + '</div>' +
       (rec.disc === "ticket" ? '<div class="tstep">주차권 시간<button data-act="tmin" data-d="-30">-</button><b>' + hmLen(tm) + '</b><button data-act="tmin" data-d="30">+</button></div>' : '') +
       (past.length ? '<div class="note red">' + I_WARN + ' 지난번 안 낸 돈 ' + past.length + '건 · ' + won(pastSum) + '도 있어요</div>' : '') +
       '<div class="mbtns">' +
@@ -534,10 +590,11 @@
           ? '<input type="datetime-local" id="eOut" step="60" value="' + toInput(d.outAt) + '">' + adjRow("out") +
             '<button class="outcancel" data-act="clearOut">나간 기록 지우기 (아직 주차 중으로)</button>'
           : '<div class="parkedbox">아직 주차 중<button data-act="outNow">지금 나간 걸로</button></div>') + '</div>' +
-        '<div class="ef"><label>할인</label><div class="seg">' +
+        '<div class="ef"><label>할인</label><div class="seg seg4">' +
           '<button class="dsc' + (!d.disc ? " on" : "") + '" data-act="dsc" data-v="">할인 없음</button>' +
           '<button class="dsc' + (d.disc === "ticket" ? " on" : "") + '" data-act="dsc" data-v="ticket">주차권</button>' +
-          '<button class="dsc' + (d.disc === "monthly" ? " on" : "") + '" data-act="dsc" data-v="monthly">월정액 무료</button></div>' +
+          '<button class="dsc' + (d.disc === "monthly" ? " on" : "") + '" data-act="dsc" data-v="monthly">월정액</button>' +
+          '<button class="dsc' + (d.disc === "staff" ? " on" : "") + '" data-act="dsc" data-v="staff">직원</button></div>' +
           (d.disc === "ticket" ? '<div class="tstep">주차권 시간<button data-act="etm" data-d="-30">-</button><b>' + hmLen(d.discMin) + '</b><button data-act="etm" data-d="30">+</button></div>' : '') + '</div>' +
         '<div class="preview" id="ePrev"></div>' +
         (d.outAt ? '<div class="ef"><label>돈 받았나요?</label><div class="seg seg2">' +
@@ -562,7 +619,7 @@
       if ($("rdOut")) $("rdOut").textContent = d.outAt ? '→ ' + dayLabel(d.outAt) + ' ' + ampm(d.outAt) : '';
       if (d.outAt) {
         if (d.outAt < d.inAt) { p.className = "preview bad"; p.innerHTML = '<span class="p-fee" style="font-size:24px">' + I_WARN + ' 나간 시간이 들어온 시간보다 빨라요</span>'; ok = false; }
-        else { var m = minsBetween(d.inAt, d.outAt); p.className = "preview"; p.innerHTML = '<span class="p-fee">' + won(calcFee(d.inAt, d.outAt, d.disc, d.discMin)).replace("원", "<span>원</span>") + '</span><span class="p-dur">이용 ' + dur(m) + (d.disc ? ' · ' + (d.disc === "monthly" ? "월정액 무료" : "주차권 " + hmLen(d.discMin) + " 뺌") : '') + ' · 바꾸면 요금이 바로 다시 계산돼요</span>'; }
+        else { var m = minsBetween(d.inAt, d.outAt); p.className = "preview"; p.innerHTML = '<span class="p-fee">' + won(calcFee(d.inAt, d.outAt, d.disc, d.discMin)).replace("원", "<span>원</span>") + '</span><span class="p-dur">이용 ' + dur(m) + (d.disc ? ' · ' + (d.disc === "ticket" ? "주차권 " + hmLen(d.discMin) + " 뺌" : KIND[d.disc] + " 무료") : '') + ' · 바꾸면 요금이 바로 다시 계산돼요</span>'; }
       } else { var m2 = minsBetween(d.inAt, Date.now()); p.className = "preview"; p.innerHTML = '<span class="p-dur">지금까지 ' + dur(m2) + '</span><span class="p-fee" style="font-size:30px">현재 ' + won(calcFee(d.inAt, Date.now(), d.disc, d.discMin)) + '</span>'; }
       $("eSave").disabled = !ok; $("eSave").style.opacity = ok ? 1 : .4;
     }
@@ -598,7 +655,7 @@
   /* ---------- 어제부터 남은 차 ---------- */
   function nightCars(){
     var t0 = sod(Date.now());
-    return records.filter(function(r){ return !r.outAt && r.inAt < t0 && (!r.seenAt || r.seenAt < t0); });
+    return records.filter(function(r){ return !r.outAt && r.inAt < t0 && (!r.seenAt || r.seenAt < t0) && !memberActive(memberOf(r.plate)); });
   }
   function openNight(){
     var list = nightCars();
@@ -617,6 +674,66 @@
       gone: function(b){ var r = byId(b.dataset.id); r.outAt = Date.now(); r.status = "unpaid"; r.reason = "gone"; addMemo(r, "나간 시각 모름 · " + dayLabel(r.outAt) + " " + hm(r.outAt) + " 확인 기준"); save(); openNight(); renderAll(); },
       close: function(){ closeModal(); renderAll(); }
     });
+  }
+
+  /* 등록 차량 (월정액 · 직원) */
+  function renderMembers(){
+    if ($("members").className.indexOf("show") === -1) return;
+    var list = members.slice().sort(function(a, b){ return (memberActive(a) ? 1 : 0) - (memberActive(b) ? 1 : 0) || a.plate.localeCompare(b.plate); });
+    $("mList").innerHTML = list.length ? '<div class="memlist">' + list.map(function(m){
+      var v = visitsOf(m.plate), open = findOpen(m.plate);
+      return '<div class="mem' + (memberActive(m) ? '' : ' off') + '">' +
+        '<div class="mp">' + esc(m.plate) + '</div>' +
+        '<div class="mk"><span class="kchip ' + m.kind + '">' + KIND[m.kind] + '</span></div>' +
+        '<div class="mn">' + esc(m.name || "") + '<div class="mu">총 ' + v.length + '번 왔어요' + (open ? ' · 지금 주차 중' : '') + '</div></div>' +
+        '<div class="mu' + mClass(m) + '">' + untilText(m) + '</div>' +
+        '<div class="ma"><button class="sbtn edit" data-act="medit" data-plate="' + esc(m.plate) + '">고치기</button></div></div>';
+    }).join("") + '</div>' : '<div class="empty">아직 등록된 차가 없어요. 위의 [+ 차량 등록하기]를 누르세요.</div>';
+  }
+  function openMemberForm(plate){
+    var m = plate ? memberOf(plate) : null;
+    var d = m ? { plate: m.plate, kind: m.kind, name: m.name || "", until: m.until || "" } : { plate: plate || "", kind: "monthly", name: "", until: "" };
+    function addMonths(n){
+      var t = d.until ? untilEnd(d) : 0, base = new Date(t > Date.now() ? t : Date.now());
+      base.setMonth(base.getMonth() + n); return ymd(base.getTime());
+    }
+    function draw(){
+      $("sheet").innerHTML = '<h2>' + (m ? '등록 정보 고치기' : '월정액·직원 차량 등록') + '</h2>' +
+        '<div class="sub">등록하면 이 번호를 넣을 때 바로 표시되고, 계산하면 자동으로 0원이 돼요.</div>' +
+        '<div class="ef"><label>차량번호</label><input type="text" id="mPlate" value="' + esc(d.plate) + '" autocomplete="off" autocorrect="off" spellcheck="false"></div>' +
+        '<div class="ef"><label>종류</label><div class="seg seg2">' +
+          '<button class="dsc' + (d.kind === "monthly" ? " on" : "") + '" data-act="mk" data-v="monthly">월정액</button>' +
+          '<button class="dsc' + (d.kind === "staff" ? " on" : "") + '" data-act="mk" data-v="staff">직원</button></div></div>' +
+        '<div class="ef"><label>누구 차인지</label><input type="text" id="mName" value="' + esc(d.name) + '" placeholder="예: 병원 원장" autocomplete="off" style="font-size:24px;font-weight:700"></div>' +
+        '<div class="ef"><label>언제까지 <span class="rd">' + (d.until ? untilText(d) : '기간 없음 · 지울 때까지 무료') + '</span></label>' +
+          '<input type="date" id="mUntil" value="' + d.until + '">' +
+          '<div class="quick"><button data-act="mplus" data-n="1">+1개월</button><button data-act="mplus" data-n="3">+3개월</button><button data-act="mplus" data-n="12">+1년</button><button data-act="mnone">기간 없음</button></div></div>' +
+        '<div class="preview bad" id="mErr" style="display:none"></div>' +
+        '<div class="mbtns mrow"><button class="mbtn ghost" data-act="close">닫기</button><button class="mbtn dark" data-act="msave">저장</button></div>' +
+        (m ? '<div style="text-align:center"><button class="linkbtn" data-act="mdel">등록 지우기</button></div>' : '');
+      $("mPlate").addEventListener("input", function(){ d.plate = this.value; });
+      $("mName").addEventListener("input", function(){ d.name = this.value; });
+      $("mUntil").addEventListener("change", function(){ d.until = this.value; draw(); });
+    }
+    openModal("", {
+      mk: function(b){ d.kind = b.dataset.v; draw(); },
+      mplus: function(b){ d.until = addMonths(+b.dataset.n); draw(); },
+      mnone: function(){ d.until = ""; draw(); },
+      close: closeModal,
+      msave: function(){
+        var p = norm(d.plate), e = $("mErr"), other = memberOf(p);
+        if (!p) { e.style.display = "flex"; e.textContent = "차량번호를 넣어 주세요."; return; }
+        if (other && other !== m) { e.style.display = "flex"; e.textContent = p + " 차는 이미 등록돼 있어요."; return; }
+        var t = m || {};
+        t.plate = p; t.kind = d.kind; t.name = d.name.trim(); t.until = d.until;
+        if (!m) members.push(t);
+        saveMembers(); closeModal(); renderAll(); toast("ok", p + " " + memberText(t) + " 등록 · " + untilText(t));
+      },
+      mdel: function(){ askConfirm("등록을 지울까요?", esc(m.plate) + " · " + esc(memberText(m)) + "<br>지우면 다음부터는 요금을 받아요.", "지우기", function(){
+        members = members.filter(function(x){ return x !== m; }); saveMembers(); renderAll(); toast("info", m.plate + " 등록을 지웠어요.");
+      }); }
+    });
+    draw();
   }
 
   /* 계산만 하고 결제 확인 안 된 차 */
@@ -656,13 +773,14 @@
       (noTotal ? '' : '<span class="stat">총 방문<b>' + v.length + '번</b></span>') +
       '<span class="stat">낸 돈 합계<b>' + won(sumFee(paid)) + '</b></span>' +
       (un.length ? '<span class="stat red">' + I_WARN + ' 미납<b>' + un.length + '건 · ' + won(sumFee(un)) + '</b></span>' : '') +
-      (v.length ? '<span class="stat">처음 온 날<b>' + dayLabel(v[0].inAt) + '</b></span>' : '') + '</div>';
+      (v.length ? '<span class="stat">처음 온 날<b>' + dayLabel(v[0].inAt) + '</b></span>' : '') + '</div>' +
+      (noTotal && memberOf(plate) ? '<div class="mbox' + mClass(memberOf(plate)) + '">등록 차량 <b>' + esc(memberText(memberOf(plate))) + '</b>' + untilText(memberOf(plate)) + '</div>' : '');
   }
 
   function renderCar(){
     var el = $("car");
     if (!focusPlate) { el.className = "car"; el.innerHTML = ""; return; }
-    var plate = focusPlate, v = visitsOf(plate), open = findOpen(plate), un = unpaidOf(plate);
+    var plate = focusPlate, v = visitsOf(plate), open = findOpen(plate), un = unpaidOf(plate), mb = memberOf(plate);
     var n = open ? nthOf(open) : v.length + 1;
     var badge = '<span class="visitno ' + (n >= 2 ? "re" : "first") + '"><b>' + n + '</b>번째 방문</span>';
     var lead = open ? '<span class="chip parked">지금 주차 중 · ' + hm(open.inAt) + '부터</span>'
@@ -670,7 +788,8 @@
     var recent = v.slice().reverse().slice(0, 3);
     el.className = "car show" + (un.length ? " owe" : "");
     el.innerHTML = '<div class="car-top"><span class="car-plate">' + esc(plate) + '</span>' + badge + lead +
-      '<button class="car-close" data-act="carclose">닫기</button></div>' +
+      '<button class="car-reg" data-act="mreg" data-plate="' + esc(plate) + '">' + (mb ? '등록 정보' : '월정액·직원 등록') + '</button><button class="car-close" data-act="carclose" style="margin-left:0">닫기</button></div>' +
+      (mb ? '<div class="mbox' + mClass(mb) + '">등록 차량 <b>' + esc(memberText(mb)) + '</b>' + untilText(mb) + (memberActive(mb) ? ' · 계산하면 자동으로 0원' : ' · 기간이 끝났어요') + '</div>' : '') +
       (v.length ? statsHtml(plate) + '<div class="visits">' + recent.map(function(r){ return visitRow(r); }).join("") + '</div>' +
         (v.length > 3 ? '<button class="car-more" data-act="history" data-plate="' + esc(plate) + '">전체 이력 보기 (' + v.length + '건)</button>' : '') : '');
   }
@@ -696,7 +815,7 @@
       if (s === "unpaid") acts += '<button class="sbtn paid" data-act="collect" data-id="' + r.id + '">받았어요</button>';
       acts += '<button class="sbtn edit" data-act="edit" data-id="' + r.id + '">고치기</button>';
       return '<div class="row st-' + s + '">' +
-        '<div class="r-plate' + (n >= 2 ? " re" : "") + '" data-act="focus" data-plate="' + esc(r.plate) + '"><b>' + esc(r.plate) + '</b><span>' + n + '번째 방문</span></div>' +
+        '<div class="r-plate' + (n >= 2 ? " re" : "") + '" data-act="focus" data-plate="' + esc(r.plate) + '"><b>' + esc(r.plate) + '</b><span>' + n + '번째 방문</span>' + mtag(r.plate) + '</div>' +
         '<div class="r-t r-in"><span>들어옴</span>' + dayLabel(r.inAt) + ' ' + hm(r.inAt) + '</div>' +
         '<div class="r-t r-out"><span>나감</span>' + (r.outAt ? dayLabel(r.outAt) + ' ' + hm(r.outAt) : (minutesOf(r) ? '주차 중 · ' + dur(minutesOf(r)) : '방금 들어옴')) + '</div>' +
         '<div class="r-fee' + (r.outAt ? '' : ' run') + '">' + (r.outAt ? won(feeOf(r)) : '현재<br>' + won(feeOf(r))) + (r.disc ? '<span class="dtag">' + discLabel(r) + '</span>' : '') + '</div>' +
@@ -710,6 +829,7 @@
     var q = norm(plateEl.value), v = q ? visitsOf(q) : [], un = q ? unpaidOf(q) : [];
     plateEl.classList.toggle("seen", v.length > 0 && !un.length);
     plateEl.classList.toggle("owe", un.length > 0);
+    plateEl.classList.toggle("mem", !!(q && memberOf(q)) && !un.length);
     var nc = nightCars(), el = $("night");
     if (nc.length) { el.className = "night show"; el.innerHTML = I_WARN + '<span>어제부터 남아 있는 차 <b>' + nc.length + '대</b> — 아직 있는지 확인해 주세요</span><button data-act="night">확인하기</button>'; }
     else { el.className = "night"; el.innerHTML = ""; }
@@ -742,7 +862,7 @@
     var info = names.map(function(p){ var v = visitsOf(p); return { p: p, v: v, last: v[v.length-1].inAt, un: unpaidOf(p) }; })
       .sort(function(a, b){ return b.last - a.last; });
     out.innerHTML = '<div class="plist">' + info.slice(0, 200).map(function(x){
-      return '<button class="pitem" data-act="spick" data-plate="' + esc(x.p) + '"><span class="pp">' + esc(x.p) + '</span>' +
+      return '<button class="pitem" data-act="spick" data-plate="' + esc(x.p) + '"><span class="pp">' + esc(x.p) + mtag(x.p) + '</span>' +
         '<span class="pc">총 <b>' + x.v.length + '번</b> · 마지막 ' + dayLabel(x.last) + ' ' + hm(x.last) + '</span>' +
         (x.un.length ? '<span class="chip unpaid">' + I_WARN + '미납 ' + won(sumFee(x.un)) + '</span>' : '') +
         (findOpen(x.p) ? '<span class="chip parked">주차 중</span>' : '') +
@@ -754,7 +874,7 @@
     if (!plate) setTimeout(function(){ $("sq").focus(); }, 50);
   }
 
-  function renderAll(){ renderTop(); renderCar(); renderList(); renderSearch(); }
+  function renderAll(){ renderTop(); renderCar(); renderList(); renderSearch(); renderMembers(); }
 
   /* ---------- 공통 버튼 처리 ---------- */
   function onAct(e){
@@ -769,11 +889,16 @@
     else if (a === "history") openSearch(b.dataset.plate);
     else if (a === "night") openNight();
     else if (a === "due") openDue();
+    else if (a === "mreg" || a === "medit") openMemberForm(b.dataset.plate);
+    else if (a === "madd") openMemberForm("");
     else if (a === "spick") { sSel = b.dataset.plate; renderSearch(); window.scrollTo(0, 0); $("search").scrollTop = 0; }
     else if (a === "sback") { sSel = null; if (norm($("sq").value) && Object.keys(visitsOf(norm($("sq").value))).length) $("sq").value = ""; renderSearch(); }
   }
   document.querySelector(".wrap").addEventListener("click", onAct);
   $("search").addEventListener("click", onAct);
+  $("members").addEventListener("click", onAct);
+  $("btnMembers").onclick = function(){ $("members").className = "search show"; renderMembers(); };
+  $("mClose").onclick = function(){ $("members").className = "search"; };
 
   $("btnPark").onclick = park;
   $("btnPay").onclick = function(){ checkout(null); };
@@ -828,6 +953,7 @@
         if (!outAt) st = "parked"; else if (/^(받음|납부|무료)/.test(stTxt)) st = "paid"; else if (stTxt.indexOf("미납") === 0) { st = "unpaid"; reason = stTxt.indexOf("몰래") !== -1 ? "gone" : "run"; }
         var nr = { id: uid(), plate: plate, inAt: inAt, outAt: outAt, status: st, reason: reason, memo: v3 ? (c[10] || "") : v2 ? (c[8] || "") : "" }, dt = v3 ? String(c[7] || "") : "";
         if (dt.indexOf("월정액") === 0) nr.disc = "monthly";
+        else if (dt.indexOf("직원") === 0) nr.disc = "staff";
         else if (dt.indexOf("주차권") === 0) { var hh = /(\d+)시간/.exec(dt), mm = /(\d+)분/.exec(dt); nr.disc = "ticket"; nr.discMin = ((hh ? +hh[1] * 60 : 0) + (mm ? +mm[1] : 0)) || 120; }
         got.push(nr);
       });

@@ -66,6 +66,11 @@
   .toast.ok{background:var(--park)} .toast.warn{background:#8A1C0C} .toast.info{background:#2D2B27}
   .toast .acts{margin-left:auto;display:flex;gap:8px}
   .toast .acts button{height:50px;padding:0 16px;border-radius:12px;border:2px solid rgba(255,255,255,.7);background:transparent;color:#fff;font-size:18px;font-weight:700}
+  .toast{flex-wrap:wrap}
+  .toast .acts button.fill{background:#fff;color:#5B3FB5;border-color:#fff;font-weight:800}
+  .car-reg.fill{background:#5B3FB5;color:#fff}
+  .car-btns{margin-left:auto;display:flex;gap:10px}
+  .car-btns .car-reg{margin-left:0}
 
   /* 차량 이력 카드 */
   .car{margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px 20px;display:none}
@@ -451,7 +456,7 @@
     var el = $("toast");
     el.className = "toast show " + kind;
     el.innerHTML = '<span>' + text + '</span><span class="acts">' + (actions || []).map(function(a, i){
-      return '<button data-ti="' + i + '">' + a.label + '</button>'; }).join("") + '<button data-ti="x">닫기</button></span>';
+      return '<button data-ti="' + i + '"' + (a.cls ? ' class="' + a.cls + '"' : '') + '>' + a.label + '</button>'; }).join("") + '<button data-ti="x">닫기</button></span>';
     el.onclick = function(e){
       var b = e.target.closest("button"); if (!b) return;
       if (b.dataset.ti !== "x") actions[+b.dataset.ti].fn();
@@ -487,9 +492,9 @@
     var n = nthOf(rec);
     focusPlate = plate; plateEl.value = ""; plateEl.blur(); tab = "open";
     renderAll();
-    toast("ok", plate + " 들어옴 " + hm(rec.inAt) + (memberOf(plate) ? " · " + memberText(memberOf(plate)) : "") + " · " + n + "번째 방문", [{ label: "실수예요, 취소", fn: function(){
+    toast("ok", plate + " 들어옴 " + hm(rec.inAt) + (memberOf(plate) ? " · " + memberText(memberOf(plate)) : "") + " · " + n + "번째 방문", (memberOf(plate) ? [] : [{ label: "월정액·직원 등록", cls: "fill", fn: function(){ openMemberForm(plate); } }]).concat([{ label: "실수예요, 취소", fn: function(){
       if (byId(rec.id) && !rec.outAt) { records = records.filter(function(r){ return r !== rec; }); save(); renderAll(); toast("info", "방금 주차 기록을 취소했어요."); }
-    }}]);
+    }}]));
     if (unpaidOf(plate).length) openOwe(plate);
   }
 
@@ -585,6 +590,7 @@
     function draw(){
       var html = '<h2>기록 고치기</h2><div class="sub">' + esc(rec.plate) + ' · ' + nthOf(rec) + '번째 방문</div>' +
         '<div class="ef"><label>차량번호</label><input type="text" id="ePlate" value="' + esc(d.plate) + '" autocomplete="off" autocorrect="off" spellcheck="false"></div>' +
+        '<button class="mbtn ghost" style="width:100%;margin-top:12px;border-color:#5B3FB5;color:#5B3FB5" data-act="toMember">' + (memberOf(rec.plate) ? '등록 정보 보기 (' + esc(memberText(memberOf(rec.plate))) + ')' : '+ 이 차 월정액·직원으로 등록') + '</button>' +
         '<div class="ef"><label>들어온 시간 <span class="rd" id="rdIn"></span></label><input type="datetime-local" id="eIn" step="60" value="' + toInput(d.inAt) + '">' + adjRow("in") + '</div>' +
         '<div class="ef"><label>나간 시간 <span class="rd" id="rdOut"></span></label>' + (d.outAt
           ? '<input type="datetime-local" id="eOut" step="60" value="' + toInput(d.outAt) + '">' + adjRow("out") +
@@ -626,6 +632,7 @@
     openModal("", {
       adj: function(b){ var k = b.dataset.f === "in" ? "inAt" : "outAt"; d[k] += (+b.dataset.m) * 60000; var el = $(b.dataset.f === "in" ? "eIn" : "eOut"); el.value = toInput(d[k]); prev(); },
       st: function(b){ d.status = b.dataset.v; if (d.status === "unpaid" && !d.reason) d.reason = "run"; document.querySelectorAll(".seg2 button").forEach(function(x){ x.classList.toggle("on", x.dataset.v === d.status); }); },
+      toMember: function(){ openMemberForm(rec.plate); },
       dsc: function(b){ d.disc = b.dataset.v; draw(); },
       etm: function(b){ d.discMin = Math.min(720, Math.max(30, d.discMin + (+b.dataset.d))); draw(); },
       outNow: function(){ d.outAt = Date.now(); d.status = "due"; draw(); },
@@ -788,7 +795,7 @@
     var recent = v.slice().reverse().slice(0, 3);
     el.className = "car show" + (un.length ? " owe" : "");
     el.innerHTML = '<div class="car-top"><span class="car-plate">' + esc(plate) + '</span>' + badge + lead +
-      '<button class="car-reg" data-act="mreg" data-plate="' + esc(plate) + '">' + (mb ? '등록 정보' : '월정액·직원 등록') + '</button><button class="car-close" data-act="carclose" style="margin-left:0">닫기</button></div>' +
+      '<span class="car-btns"><button class="car-reg' + (mb ? '' : ' fill') + '" data-act="mreg" data-plate="' + esc(plate) + '">' + (mb ? '등록 정보' : '+ 월정액·직원 등록') + '</button><button class="car-close" data-act="carclose" style="margin-left:0">닫기</button></span></div>' +
       (mb ? '<div class="mbox' + mClass(mb) + '">등록 차량 <b>' + esc(memberText(mb)) + '</b>' + untilText(mb) + (memberActive(mb) ? ' · 계산하면 자동으로 0원' : ' · 기간이 끝났어요') + '</div>' : '') +
       (v.length ? statsHtml(plate) + '<div class="visits">' + recent.map(function(r){ return visitRow(r); }).join("") + '</div>' +
         (v.length > 3 ? '<button class="car-more" data-act="history" data-plate="' + esc(plate) + '">전체 이력 보기 (' + v.length + '건)</button>' : '') : '');

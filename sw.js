@@ -1,6 +1,6 @@
 // 화면 파일은 인터넷이 되면 새 버전을 받고, 안 되면 저장해 둔 것으로 연다.
-const CACHE = "parking-v2";
-const FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon-180.png", "./icon-512.png"];
+const CACHE = "parking-v3";
+const FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon-180.png", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
